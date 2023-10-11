@@ -1,26 +1,30 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "laravel-quick-log" is now active!');
+	let addInfoLog = vscode.commands.registerCommand('laravel-quick-log.addInfoLog', () => {
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('laravel-quick-log.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Laravel Quick Log!');
+		const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
+		if (!editor) {
+			return;
+		}
+
+		const document: vscode.TextDocument = editor.document;
+		const selection: vscode.Selection = editor.selection;
+
+		let word = document.getText(selection);
+		// removes `;` from selection
+		if (word.includes(";")) {
+			word = word.replace(";", "");
+		}
+
+		const insert = `info(${word}); \n`;
+		let insertPosition = new vscode.Position(selection.active.line + 1, 0);
+
+		editor.edit(editBuilder => {
+			editBuilder.insert(insertPosition, insert);
+		});
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(addInfoLog);
 }
-
-// This method is called when your extension is deactivated
-export function deactivate() {}
